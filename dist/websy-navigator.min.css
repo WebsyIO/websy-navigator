@@ -1,0 +1,6 @@
+.view {
+  display: none;
+}
+.view.active {
+  display: initial;
+}
