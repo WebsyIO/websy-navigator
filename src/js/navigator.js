@@ -1,7 +1,7 @@
 class WebsyNavigator {
   constructor(options) {
     const defaults = {
-      menuClass: "nav-item",
+      triggerClass: "trigger-item",
       viewClass: "view",
       activeClass: "active",
       viewAttribute: "data-view",
@@ -22,22 +22,22 @@ class WebsyNavigator {
       `
       document.querySelector("head").innerHTML += style
     }
-    let menuItems = document.getElementsByClassName(this.options.menuClass)
-    for (let i = 0; i < menuItems.length; i++) {
+    let triggerItems = document.getElementsByClassName(this.options.triggerClass)
+    for (let i = 0; i < triggerItems.length; i++) {
       // get the view for each item
-      let viewAttr = menuItems[i].attributes[this.options.viewAttribute]
+      let viewAttr = triggerItems[i].attributes[this.options.viewAttribute]
       if (viewAttr && viewAttr.value!=="") {
         // check to see if the item belongs to a group
         // use the group to add an additional class to the item
-        // this combines the menuClass and groupAttr properties
-        let groupAttr = menuItems[i].attributes[this.options.groupAttribute]
+        // this combines the triggerClass and groupAttr properties
+        let groupAttr = triggerItems[i].attributes[this.options.groupAttribute]
         let group = this.options.defaultGroup
         if (groupAttr && groupAttr.value!=="") {
           // if no group is found, assign it to the default group
           group = groupAttr.value
         }
-        menuItems[i].classList.add(`${this.options.menuClass}-${group}`)
-        menuItems[i].addEventListener("click", this.navigate.bind(this, viewAttr.value, group))
+        triggerItems[i].classList.add(`${this.options.triggerClass}-${group}`)
+        triggerItems[i].addEventListener("click", this.navigate.bind(this, viewAttr.value, group))
       }
     }
     // Assign group class to views
@@ -54,13 +54,16 @@ class WebsyNavigator {
     }
     this.navigate(this.currentPath, this.options.defaultGroup)
   }
+  init(){
+    this.navigate(this.currentPath)
+  }
   navigate(path, group){
     if (path=="") {
       path = this.options.defaultView
     }
-    this.hideMenuItems(group)
+    this.hideTriggerItems(group)
     this.hideViewItems(group)
-    this.activateItem(path, this.options.menuClass)
+    this.activateItem(path, this.options.triggerClass)
     this.activateItem(path, this.options.viewClass)
     let oldPath = this.currentPath
     if(this.currentPath!==path && group===this.options.defaultGroup){
@@ -85,8 +88,8 @@ class WebsyNavigator {
     }
     return path
   }
-  hideMenuItems(group){
-    let c = this.options.menuClass
+  hideTriggerItems(group){
+    let c = this.options.triggerClass
     if (group) {
       c += `-${group}`
     }

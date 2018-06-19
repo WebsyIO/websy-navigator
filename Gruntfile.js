@@ -46,10 +46,11 @@ module.exports = function(grunt) {
       options : {
         beautify : false,
         mangle   : {
-          properties: true,
+          properties: false,
           reserved: ["onPopState"]
         },
         reserveDOMProperties: true,
+        reserved: ["onPopState"],
         compress : true
       },
       build: {

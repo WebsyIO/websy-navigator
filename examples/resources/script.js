@@ -1,4 +1,4 @@
-let navController = new SimpleNavigator({
+let navController = new WebsyNavigator({
   defaultView: "a",
   viewClass: "websy-view"
 })

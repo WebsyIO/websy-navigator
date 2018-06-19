@@ -58,6 +58,11 @@ var WebsyNavigator = function () {
   }
 
   _createClass(WebsyNavigator, [{
+    key: "init",
+    value: function init() {
+      this.navigate(this.currentPath);
+    }
+  }, {
     key: "navigate",
     value: function navigate(path, group) {
       if (path == "") {

@@ -54,6 +54,9 @@ class WebsyNavigator {
     }
     this.navigate(this.currentPath, this.options.defaultGroup)
   }
+  init(){
+    this.navigate(this.currentPath)
+  }
   navigate(path, group){
     if (path=="") {
       path = this.options.defaultView
