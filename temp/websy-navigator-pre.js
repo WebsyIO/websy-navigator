@@ -4,9 +4,9 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var SimpleNavigator = function () {
-  function SimpleNavigator(options) {
-    _classCallCheck(this, SimpleNavigator);
+var WebsyNavigator = function () {
+  function WebsyNavigator(options) {
+    _classCallCheck(this, WebsyNavigator);
 
     var defaults = {
       menuClass: "nav-item",
@@ -57,7 +57,7 @@ var SimpleNavigator = function () {
     this.navigate(this.currentPath, this.options.defaultGroup);
   }
 
-  _createClass(SimpleNavigator, [{
+  _createClass(WebsyNavigator, [{
     key: "navigate",
     value: function navigate(path, group) {
       if (path == "") {
@@ -139,5 +139,5 @@ var SimpleNavigator = function () {
     }
   }]);
 
-  return SimpleNavigator;
+  return WebsyNavigator;
 }();

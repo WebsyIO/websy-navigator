@@ -37,7 +37,7 @@ module.exports = function(grunt) {
   		dist: {
   			files: [
           {
-    				'dist/websy-navigator.js': 'temp/navigator.js'
+    				'temp/websy-navigator-pre.js': 'temp/navigator.js'
     			}
         ]
   		}
@@ -45,12 +45,16 @@ module.exports = function(grunt) {
     uglify:{
       options : {
         beautify : false,
-        mangle   : true,
+        mangle   : {
+          properties: true,
+          reserved: ["onPopState"]
+        },
+        reserveDOMProperties: true,
         compress : true
       },
       build: {
         files: [
-          {"dist/websy-navigator.min.js":"dist/websy-navigator.js"}
+          {"dist/websy-navigator.min.js":"temp/websy-navigator-pre.js"}
         ]
       }
     },

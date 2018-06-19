@@ -1,4 +1,4 @@
-class SimpleNavigator {
+class WebsyNavigator {
   constructor(options) {
     const defaults = {
       menuClass: "nav-item",
