@@ -1,6 +1,12 @@
 ## Websy Navigator
 The Websy Navigator is a simple JavaScript class that allows developers to build Single-Page-Applications with minimal amounts of JavaScript. It works by allowing the developer to configure 'views', simply by adding the required classes and attributes to their HTML markup. Each item within the navigator effectively consists of 2 HTML elements. The 'trigger' element and the 'view' element. All 'view' elements are hidden by default. When a 'trigger' element is clicked, the corresponding 'view' element is then shown.
 
+#### Installation
+The package can be installed using NPM.
+``` javascript
+npm install websy-navigator
+```
+
 #### Defining Trigger Elements
 To define a `Trigger Element`, you need to add a class of `trigger-item` and a `data-view` attribute to the desired element. The value for the `data-view` attribute should correspond with that of a `View Element`.
 ``` html
