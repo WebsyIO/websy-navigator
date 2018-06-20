@@ -6,6 +6,11 @@ The package can be installed using NPM.
 ``` javascript
 npm install websy-navigator
 ```
+You should then include both the JS and CSS files in your web application.
+``` html
+<link rel="stylesheet" href="<pathTo>/websy-navigator.min.css">
+<script src="<pathTo>/websy-navigator.min.js" charset="utf-8"></script>
+```
 
 #### Defining Trigger Elements
 To define a `Trigger Element`, you need to add a class of `trigger-item` and a `data-view` attribute to the desired element. The value for the `data-view` attribute should correspond with that of a `View Element`.

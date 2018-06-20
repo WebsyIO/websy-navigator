@@ -9,7 +9,7 @@ var WebsyNavigator = function () {
     _classCallCheck(this, WebsyNavigator);
 
     var defaults = {
-      menuClass: "nav-item",
+      triggerClass: "trigger-item",
       viewClass: "view",
       activeClass: "active",
       viewAttribute: "data-view",
@@ -25,22 +25,22 @@ var WebsyNavigator = function () {
       var style = "\n        <style>\n          ." + this.options.viewClass + "{ display: none; }\n          ." + this.options.viewClass + "." + this.options.activeClass + "{ display: initial; }\n        </style>\n      ";
       document.querySelector("head").innerHTML += style;
     }
-    var menuItems = document.getElementsByClassName(this.options.menuClass);
-    for (var i = 0; i < menuItems.length; i++) {
+    var triggerItems = document.getElementsByClassName(this.options.triggerClass);
+    for (var i = 0; i < triggerItems.length; i++) {
       // get the view for each item
-      var viewAttr = menuItems[i].attributes[this.options.viewAttribute];
+      var viewAttr = triggerItems[i].attributes[this.options.viewAttribute];
       if (viewAttr && viewAttr.value !== "") {
         // check to see if the item belongs to a group
         // use the group to add an additional class to the item
-        // this combines the menuClass and groupAttr properties
-        var groupAttr = menuItems[i].attributes[this.options.groupAttribute];
+        // this combines the triggerClass and groupAttr properties
+        var groupAttr = triggerItems[i].attributes[this.options.groupAttribute];
         var group = this.options.defaultGroup;
         if (groupAttr && groupAttr.value !== "") {
           // if no group is found, assign it to the default group
           group = groupAttr.value;
         }
-        menuItems[i].classList.add(this.options.menuClass + "-" + group);
-        menuItems[i].addEventListener("click", this.navigate.bind(this, viewAttr.value, group));
+        triggerItems[i].classList.add(this.options.triggerClass + "-" + group);
+        triggerItems[i].addEventListener("click", this.navigate.bind(this, viewAttr.value, group));
       }
     }
     // Assign group class to views
@@ -68,9 +68,9 @@ var WebsyNavigator = function () {
       if (path == "") {
         path = this.options.defaultView;
       }
-      this.hideMenuItems(group);
+      this.hideTriggerItems(group);
       this.hideViewItems(group);
-      this.activateItem(path, this.options.menuClass);
+      this.activateItem(path, this.options.triggerClass);
       this.activateItem(path, this.options.viewClass);
       var oldPath = this.currentPath;
       if (this.currentPath !== path && group === this.options.defaultGroup) {
@@ -93,9 +93,9 @@ var WebsyNavigator = function () {
       this.options.subscribers.push(fn);
     }
   }, {
-    key: "hideMenuItems",
-    value: function hideMenuItems(group) {
-      var c = this.options.menuClass;
+    key: "hideTriggerItems",
+    value: function hideTriggerItems(group) {
+      var c = this.options.triggerClass;
       if (group) {
         c += "-" + group;
       }
