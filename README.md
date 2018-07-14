@@ -51,12 +51,12 @@ The following options are available on the WebsyNavigator:
 * **defaultGroup** - Set the default group.
 
 #### Grouping
-To build hierarchical views, an additional attribute of `data-group` can be provided to the HTML element. Elements without this attribute are implicitly added to a group called `main`, unless overridden in the options. `View Elements` that belong to the `main` group will also cause the Url to update. For any other group, the Url is not updated. To set a default a `View Element` that belongs to a group other than `main`, add the relevant `active` class to it.
+To build hierarchical views, an additional attribute of `data-group` can be provided to the HTML element. Elements without this attribute are implicitly added to a group called `main`, unless overridden in the options. `View Elements` that belong to the `main` group will also cause the Url to update. For any other group, the Url is not updated. To set a default a `View Element` that belongs to a group other than `main`, add the relevant `active` class to it. A `data-parent` attribute should also be assigned, providing the desired parent `view` as the value. This will ensure that all views and child views are opened/closed correctly when navigating.
 ``` html
 <div class="view" data-view="home">
   This is the Home page
-  <button class="trigger-item" data-view="subviewa" data-group="home">Sub-view A</button>
-  <button class="trigger-item" data-view="subviewb" data-group="home">Sub-view B</button>
+  <button class="trigger-item" data-view="subviewa" data-group="mygroup" data-parent="home">Sub-view A</button>
+  <button class="trigger-item" data-view="subviewb" data-group="mygroup" data-parent="home">Sub-view B</button>
   <div class="view" data-view="subviewa">
     This is sub-view A
   </div>
@@ -65,6 +65,23 @@ To build hierarchical views, an additional attribute of `data-group` can be prov
   </div>
 </div>
 ```
+
+#### Flippable Objects
+It's possible to build a `flippable` element which has a front and back. Clicking on it will cause it to rotate and reveal whatever is on the other side. To configure the HTML structure, you will need an outer element to act as the parent to the front and back faces. As a minimum, this element should be styles with `position: relative;`. The `front` and `back` should then be children of this element and be assigned the classes `trigger-item` and `flippable-item`. The designated `back` element should be assigned the `active` class. They should also have a unique `data-group` attribute and each have their own `data-view` attribute. A corresponding `view` element is **NOT** required. Here is a simple example implementation:
+``` html
+<!-- containing element -->
+<div style="position: relative; height: 200px; width: 200px;">
+	<!-- front -->
+	<div class="trigger-item flippable-item" style="background-color: red;" data-view="front" data-group="flippable">
+	</div>
+	<!-- back -->
+	<div class="trigger-item flippable-item active" style="background-color: blue;" data-view="back" data-group="flippable">
+	</div>
+</div>
+```
+
+#### Toggle Behaviour
+To create views that can be toggled on and off, simply add an the `trigger-toggle` class to each applicable `Trigger Element`.
 
 #### Subscribing
 To subscribe to the WebsyNavigator and listen for when the current `view` has changed. The provided callback function receives 2 parameters, the id of the current `view` and the id of the previous `view`.

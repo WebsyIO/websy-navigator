@@ -10,7 +10,7 @@ module.exports = function(grunt) {
     watch: {
       styles: {
         files: ['src/**/*.js','src/less/**/*.less'], // which files to watch
-        tasks: ['includes','babel','uglify','copy','less'],
+        tasks: ['includes','babel','uglify','less','copy'],
         options: {
           nospawn: true,
           livereload: true
@@ -70,7 +70,7 @@ module.exports = function(grunt) {
     copy: {
       main: {
         files: [
-          { src: ['dist/websy-navigator.min.js'], dest: 'examples/resources/websy-navigator.min.js'},
+          { src: ['temp/websy-navigator-pre.js'], dest: 'examples/resources/websy-navigator.min.js'},
           { src: ['dist/websy-navigator.min.css'], dest: 'examples/resources/websy-navigator.min.css'}
         ],
       }
