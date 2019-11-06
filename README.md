@@ -84,9 +84,9 @@ It's possible to build a `flippable` element which has a front and back. Clickin
 To create views that can be toggled on and off, simply add an the `trigger-toggle` class to each applicable `Trigger Element`.
 
 #### Subscribing
-To subscribe to the WebsyNavigator and listen for when the current `view` has changed. The provided callback function receives 2 parameters, the actions (show/hide) and the id of the current `view`.
+To subscribe to the WebsyNavigator and listen for when the current `view` has changed you can call the subscribe function passing in either 'show' or 'hide' as the first parameter and a callback for the second. The provided callback function receives up to 2 parameters, the id of the `view` and any available url parameters.
 ``` javascript
-navController.subscribe('show', view => {
+navController.subscribe('show', (view, params) => {
 
 })
 navController.subscribe('hide', view => {
