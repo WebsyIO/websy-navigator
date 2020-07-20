@@ -38,6 +38,7 @@ function () {
     window.addEventListener('keydown', this.handleKeyDown.bind(this));
     window.addEventListener('keyup', this.handleKeyUp.bind(this));
     window.addEventListener('focus', this.handleFocus.bind(this));
+    window.addEventListener('click', this.handleClick.bind(this));
     this.options = _extends({}, defaults, options); // add any necessary CSS if the viewClass has been changed
 
     if (this.options.viewClass !== defaults.viewClass || this.options.activeClass !== defaults.activeClass) {
@@ -106,6 +107,16 @@ function () {
       }
 
       return views;
+    }
+  }, {
+    key: "handleClick",
+    value: function handleClick(event) {
+      // const id = event.target.id		
+      if (event.target.classList.contains(this.options.triggerClass)) {
+        var view = event.target.getAttribute(this.options.viewAttribute);
+        var group = event.target.getAttribute(this.options.groupAttribute);
+        this.navigate(view, group || 'main', event);
+      }
     }
   }, {
     key: "init",
@@ -227,8 +238,7 @@ function () {
             triggerItems[i].classList.add("parent-".concat(parentAttr.value));
           }
 
-          triggerItems[i].classList.add("".concat(this.options.triggerClass, "-").concat(group));
-          triggerItems[i].addEventListener("click", this.navigate.bind(this, viewAttr.value, group));
+          triggerItems[i].classList.add("".concat(this.options.triggerClass, "-").concat(group)); //triggerItems[i].addEventListener("click", this.navigate.bind(this, viewAttr.value, group))
         }
       } // Assign group class to views
 

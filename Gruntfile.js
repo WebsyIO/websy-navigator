@@ -85,4 +85,5 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-express-server');
   grunt.registerTask('default', ['copy','includes','babel','uglify','less','copy','express','watch']);
+  grunt.registerTask('build', ['copy','includes','babel','uglify','less','copy']);
 };

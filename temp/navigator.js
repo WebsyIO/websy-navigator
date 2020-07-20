@@ -20,7 +20,8 @@ class WebsyNavigator {
     window.addEventListener('popstate', this.onPopState.bind(this))
 		window.addEventListener('keydown', this.handleKeyDown.bind(this))
     window.addEventListener('keyup', this.handleKeyUp.bind(this))
-    window.addEventListener('focus', this.handleFocus.bind(this))
+		window.addEventListener('focus', this.handleFocus.bind(this))
+		window.addEventListener('click', this.handleClick.bind(this))
     this.options = Object.assign({}, defaults, options)
     // add any necessary CSS if the viewClass has been changed
     if (this.options.viewClass!==defaults.viewClass || this.options.activeClass!==defaults.activeClass) {
@@ -78,6 +79,14 @@ class WebsyNavigator {
 			}
 		}
 		return views
+	}
+	handleClick (event) {
+		// const id = event.target.id		
+		if (event.target.classList.contains(this.options.triggerClass)) {
+			const view = event.target.getAttribute(this.options.viewAttribute)
+			const group = event.target.getAttribute(this.options.groupAttribute)
+			this.navigate(view, group || 'main', event)
+		}
 	}
   init(){
 		this.registerElements(document)
@@ -175,7 +184,7 @@ class WebsyNavigator {
 					triggerItems[i].classList.add(`parent-${parentAttr.value}`)
 				}
         triggerItems[i].classList.add(`${this.options.triggerClass}-${group}`)
-        triggerItems[i].addEventListener("click", this.navigate.bind(this, viewAttr.value, group))
+        //triggerItems[i].addEventListener("click", this.navigate.bind(this, viewAttr.value, group))
       }
     }
     // Assign group class to views
