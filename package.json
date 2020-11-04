@@ -1,6 +1,6 @@
 {
   "name": "websy-navigator",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A JavaScript framework that creates a single page app style navigation framework from HTML markup",
   "main": "index.js",
   "scripts": {
