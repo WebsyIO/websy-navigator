@@ -32,6 +32,8 @@ function () {
     this.triggerIdList = [];
     this.viewIdList = [];
     this.previousPath = '';
+    this.previousView = '';
+    this.currentView = '';
     this.currentParams = {};
     this.controlPressed = false;
     window.addEventListener('popstate', this.onPopState.bind(this));
@@ -136,6 +138,12 @@ function () {
 
       if (typeof params !== 'undefined') {
         url += "?".concat(params.path);
+      }
+
+      this.currentView = view;
+
+      if (this.currentView === '/' || this.currentView === '') {
+        this.currentView = this.options.defaultView;
       }
 
       if (view !== "") {
@@ -333,6 +341,7 @@ function () {
         newPath = "";
       }
 
+      this.previousView = this.currentView;
       this.previousPath = this.currentPath;
 
       if (this.groups[group]) {
@@ -348,7 +357,7 @@ function () {
       // if (toggle === true || this.previousPath !== newPath) {
 
 
-      this.hideView(this.previousPath, group); // }    
+      this.hideView(this.previousView, group); // }    
       // this.hideView(group)
       // }
       // if (toggle===true) {
@@ -363,7 +372,13 @@ function () {
         this.groups[group].activeView = newPath;
       }
 
-      this.showView(newPath, this.currentParams);
+      this.currentView = newPath;
+
+      if (this.currentView === '/') {
+        this.currentView = this.options.defaultView;
+      }
+
+      this.showView(this.currentView, this.currentParams);
 
       if ((this.currentPath !== newPath || previousParamsPath !== this.currentParams.path) && group === this.options.defaultGroup) {
         console.log('popped', popped);

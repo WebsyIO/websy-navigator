@@ -15,6 +15,8 @@ class WebsyNavigator {
 		this.triggerIdList = []
 		this.viewIdList = []		
 		this.previousPath = ''
+		this.previousView = ''
+		this.currentView = ''
 		this.currentParams = {}
 		this.controlPressed = false
     window.addEventListener('popstate', this.onPopState.bind(this))
@@ -102,6 +104,10 @@ class WebsyNavigator {
 		url = view
 		if (typeof params !== 'undefined') {
 			url += `?${params.path}`
+		}
+		this.currentView = view
+		if (this.currentView === '/' || this.currentView === '') {
+			this.currentView = this.options.defaultView
 		}
 		if (view !== "") {
       this.showView(view, params)
@@ -260,6 +266,7 @@ class WebsyNavigator {
 		if (toggle===true && this.groups[group].activeView!=="") {
 			newPath = ""
 		}				
+		this.previousView = this.currentView		
 		this.previousPath = this.currentPath
 		if (this.groups[group]) {
 			if (toggle===false) {			
@@ -272,7 +279,7 @@ class WebsyNavigator {
 		// }
 		// else {
 		// if (toggle === true || this.previousPath !== newPath) {
-			this.hideView(this.previousPath, group)
+			this.hideView(this.previousView, group)
     // }    
 		// this.hideView(group)
 		// }
@@ -285,7 +292,11 @@ class WebsyNavigator {
 		if (group && this.groups[group] && group!==this.options.defaultGroup) {
 			this.groups[group].activeView = newPath
 		}		
-		this.showView(newPath, this.currentParams)
+		this.currentView = newPath
+		if (this.currentView === '/') {
+			this.currentView = this.options.defaultView
+		}
+		this.showView(this.currentView, this.currentParams)
     if((this.currentPath !== newPath || previousParamsPath !== this.currentParams.path) && group===this.options.defaultGroup){			
       console.log('popped', popped)      
       if (popped === false) {

@@ -59,20 +59,16 @@ module.exports = function(grunt) {
           {"dist/websy-navigator.min.js":"temp/websy-navigator-pre.js"}
         ]
       }
-    },
-    express: {
-			prod: {
-				options: {
-          port: 4000,
-					script: "index.js"
-				}
-			}
-		},
+    },    
     copy: {
       main: {
         files: [
           { src: ['temp/websy-navigator-pre.js'], dest: 'examples/resources/websy-navigator.min.js'},
-          { src: ['dist/websy-navigator.min.css'], dest: 'examples/resources/websy-navigator.min.css'}
+          { src: ['dist/websy-navigator.min.css'], dest: 'examples/resources/websy-navigator.min.css'},
+          {
+						src: ['temp/navigator.js'],
+						dest: 'dist/websy-navigator.debug.js'
+					}
         ],
       }
     }
@@ -84,6 +80,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-express-server');
-  grunt.registerTask('default', ['copy','includes','babel','uglify','less','copy','express','watch']);
+  grunt.registerTask('default', ['copy','includes','babel','uglify','less','copy','watch']);
   grunt.registerTask('build', ['copy','includes','babel','uglify','less','copy']);
 };
