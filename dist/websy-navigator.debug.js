@@ -135,8 +135,8 @@ class WebsyNavigator {
 		// if (group===this.options.defaultGroup) {
 			// this.hideTriggerItems(view, group)
 	    // this.hideViewItems(view, group)
-			this.hideTriggerItems(group)
-	    this.hideViewItems(group)
+			this.hideTriggerItems(view, group)
+	    this.hideViewItems(view, group)
 		// }
 		// hide any child items
 		if (group===this.options.defaultGroup) {
@@ -278,9 +278,12 @@ class WebsyNavigator {
 		//
 		// }
 		// else {
-		// if (toggle === true || this.previousPath !== newPath) {
+		if (toggle === true && this.previousPath !== '') {
+			this.hideView(this.previousPath, group)
+		}
+		else {
 			this.hideView(this.previousView, group)
-    // }    
+		}    
 		// this.hideView(group)
 		// }
 		// if (toggle===true) {
@@ -291,12 +294,19 @@ class WebsyNavigator {
 		}
 		if (group && this.groups[group] && group!==this.options.defaultGroup) {
 			this.groups[group].activeView = newPath
+		}
+		if (toggle === false) {
+			this.currentView = newPath	
 		}		
-		this.currentView = newPath
 		if (this.currentView === '/') {
 			this.currentView = this.options.defaultView
 		}
-		this.showView(this.currentView, this.currentParams)
+		if (toggle === false) {
+			this.showView(this.currentView, this.currentParams)
+		}
+		else {
+			this.showView(newPath)
+		}
     if((this.currentPath !== newPath || previousParamsPath !== this.currentParams.path) && group===this.options.defaultGroup){			
       console.log('popped', popped)      
       if (popped === false) {
@@ -340,22 +350,20 @@ class WebsyNavigator {
 		}
 		return
 	}
-  hideTriggerItems(group){
-    let className = this.options.triggerClass
-    if (group) {
-      className += `-${group}`
-    }
-    this.hideItems(className)
+  hideTriggerItems(view, group){
+    this.hideItems(this.options.triggerClass, group)
   }
-  hideViewItems(group){
-    let className = this.options.viewClass
-    if (group) {
-      className += `-${group}`
-    }
-    this.hideItems(className)
+  hideViewItems(view, group){
+    this.hideItems(view, group)
   }
-  hideItems(className){
-    let els = document.getElementsByClassName(className)
+  hideItems(view, group){
+		let els 
+		if (group && group !== 'main') {
+			els = [...document.querySelectorAll(`[${this.options.groupAttribute}="${group}"]`)]
+		}
+		else {
+			els = [...document.querySelectorAll(`[${this.options.viewAttribute}="${view}"]`)]
+		}		
     if (els) {
       for (var i = 0; i < els.length; i++) {
         els[i].classList.remove(this.options.activeClass)
