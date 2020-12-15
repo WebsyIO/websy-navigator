@@ -1,5 +1,13 @@
 "use strict";
 
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -36,6 +44,7 @@ function () {
     this.currentView = '';
     this.currentParams = {};
     this.controlPressed = false;
+    this.usesHTMLSuffix = window.location.pathname.indexOf('.htm') !== -1;
     window.addEventListener('popstate', this.onPopState.bind(this));
     window.addEventListener('keydown', this.handleKeyDown.bind(this));
     window.addEventListener('keyup', this.handleKeyUp.bind(this));
@@ -179,8 +188,8 @@ function () {
       // if (group===this.options.defaultGroup) {
       // this.hideTriggerItems(view, group)
       // this.hideViewItems(view, group)
-      this.hideTriggerItems(group);
-      this.hideViewItems(group); // }
+      this.hideTriggerItems(view, group);
+      this.hideViewItems(view, group); // }
       // hide any child items
 
       if (group === this.options.defaultGroup) {
@@ -308,8 +317,12 @@ function () {
       var params = {};
       var newPath = inputPath;
 
-      if (inputPath === this.options.defaultView) {
+      if (inputPath === this.options.defaultView && this.usesHTMLSuffix === false) {
         inputPath = inputPath.replace(this.options.defaultView, '/');
+      }
+
+      if (this.usesHTMLSuffix === true) {
+        inputPath = "?view=".concat(inputPath);
       }
 
       var previousParamsPath = this.currentParams.path;
@@ -320,10 +333,10 @@ function () {
         return;
       }
 
-      if (newPath.indexOf('?') !== -1 && group === this.options.defaultGroup) {
-        var parts = newPath.split('?');
+      if (inputPath.indexOf('?') !== -1 && group === this.options.defaultGroup) {
+        var parts = inputPath.split('?');
         params = this.formatParams(parts[1]);
-        newPath = parts[0];
+        inputPath = parts[0];
       } else if (group === this.options.defaultGroup) {
         this.currentParams = {};
       }
@@ -354,15 +367,18 @@ function () {
       //
       // }
       // else {
-      // if (toggle === true || this.previousPath !== newPath) {
 
 
-      this.hideView(this.previousView, group); // }    
-      // this.hideView(group)
+      if (toggle === true && this.previousPath !== '') {
+        this.hideView(this.previousPath, group);
+      } else {
+        this.hideView(this.previousView, group);
+      } // this.hideView(group)
       // }
       // if (toggle===true) {
       // 	this.groups[group].activeView = newPath
       // }
+
 
       if (toggle === true && newPath === groupActiveView) {
         return;
@@ -372,13 +388,23 @@ function () {
         this.groups[group].activeView = newPath;
       }
 
-      this.currentView = newPath;
+      if (toggle === false) {
+        this.currentView = newPath;
+      }
 
       if (this.currentView === '/') {
         this.currentView = this.options.defaultView;
       }
 
-      this.showView(this.currentView, this.currentParams);
+      if (toggle === false) {
+        this.showView(this.currentView, this.currentParams);
+      } else {
+        this.showView(newPath);
+      }
+
+      if (this.usesHTMLSuffix === true) {
+        inputPath = window.location.pathname.split("/").pop() + inputPath;
+      }
 
       if ((this.currentPath !== newPath || previousParamsPath !== this.currentParams.path) && group === this.options.defaultGroup) {
         console.log('popped', popped);
@@ -416,30 +442,24 @@ function () {
     }
   }, {
     key: "hideTriggerItems",
-    value: function hideTriggerItems(group) {
-      var className = this.options.triggerClass;
-
-      if (group) {
-        className += "-".concat(group);
-      }
-
-      this.hideItems(className);
+    value: function hideTriggerItems(view, group) {
+      this.hideItems(this.options.triggerClass, group);
     }
   }, {
     key: "hideViewItems",
-    value: function hideViewItems(group) {
-      var className = this.options.viewClass;
-
-      if (group) {
-        className += "-".concat(group);
-      }
-
-      this.hideItems(className);
+    value: function hideViewItems(view, group) {
+      this.hideItems(view, group);
     }
   }, {
     key: "hideItems",
-    value: function hideItems(className) {
-      var els = document.getElementsByClassName(className);
+    value: function hideItems(view, group) {
+      var els;
+
+      if (group && group !== 'main') {
+        els = _toConsumableArray(document.querySelectorAll("[".concat(this.options.groupAttribute, "=\"").concat(group, "\"]")));
+      } else {
+        els = _toConsumableArray(document.querySelectorAll("[".concat(this.options.viewAttribute, "=\"").concat(view, "\"]")));
+      }
 
       if (els) {
         for (var i = 0; i < els.length; i++) {

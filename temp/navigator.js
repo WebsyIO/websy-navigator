@@ -19,6 +19,7 @@ class WebsyNavigator {
 		this.currentView = ''
 		this.currentParams = {}
 		this.controlPressed = false
+		this.usesHTMLSuffix = window.location.pathname.indexOf('.htm') !== -1
     window.addEventListener('popstate', this.onPopState.bind(this))
 		window.addEventListener('keydown', this.handleKeyDown.bind(this))
     window.addEventListener('keyup', this.handleKeyUp.bind(this))
@@ -135,8 +136,8 @@ class WebsyNavigator {
 		// if (group===this.options.defaultGroup) {
 			// this.hideTriggerItems(view, group)
 	    // this.hideViewItems(view, group)
-			this.hideTriggerItems(group)
-	    this.hideViewItems(group)
+			this.hideTriggerItems(view, group)
+	    this.hideViewItems(view, group)
 		// }
 		// hide any child items
 		if (group===this.options.defaultGroup) {
@@ -235,21 +236,24 @@ class WebsyNavigator {
 		}		
 		let toggle = false
 		let groupActiveView
-		let params = {}
-    let newPath = inputPath
-    if (inputPath === this.options.defaultView) {
+		let params = {}    
+		let newPath = inputPath
+    if (inputPath === this.options.defaultView && this.usesHTMLSuffix === false) {
       inputPath = inputPath.replace(this.options.defaultView, '/')
-    }	
+		}
+		if (this.usesHTMLSuffix === true) {
+			inputPath = `?view=${inputPath}`
+		}		
 		let previousParamsPath = this.currentParams.path
 		if (this.controlPressed === true && group===this.options.defaultGroup) {			
 			// Open the path in a new browser tab
 			window.open(`${window.location.origin}/${inputPath}`, '_blank')
 			return
 		}
-		if (newPath.indexOf('?') !== -1 && group===this.options.defaultGroup) {
-			let parts = newPath.split('?')
+		if (inputPath.indexOf('?') !== -1 && group===this.options.defaultGroup) {
+			let parts = inputPath.split('?')
 			params = this.formatParams(parts[1])
-			newPath = parts[0]
+			inputPath = parts[0]
 		}
 		else if (group===this.options.defaultGroup) {
 			this.currentParams = {}
@@ -278,9 +282,12 @@ class WebsyNavigator {
 		//
 		// }
 		// else {
-		// if (toggle === true || this.previousPath !== newPath) {
+		if (toggle === true && this.previousPath !== '') {
+			this.hideView(this.previousPath, group)
+		}
+		else {
 			this.hideView(this.previousView, group)
-    // }    
+		}    
 		// this.hideView(group)
 		// }
 		// if (toggle===true) {
@@ -291,12 +298,22 @@ class WebsyNavigator {
 		}
 		if (group && this.groups[group] && group!==this.options.defaultGroup) {
 			this.groups[group].activeView = newPath
+		}
+		if (toggle === false) {
+			this.currentView = newPath	
 		}		
-		this.currentView = newPath
 		if (this.currentView === '/') {
 			this.currentView = this.options.defaultView
 		}
-		this.showView(this.currentView, this.currentParams)
+		if (toggle === false) {
+			this.showView(this.currentView, this.currentParams)
+		}
+		else {
+			this.showView(newPath)
+		}
+		if (this.usesHTMLSuffix === true) {
+			inputPath = window.location.pathname.split("/").pop() + inputPath
+		}
     if((this.currentPath !== newPath || previousParamsPath !== this.currentParams.path) && group===this.options.defaultGroup){			
       console.log('popped', popped)      
       if (popped === false) {
@@ -340,22 +357,20 @@ class WebsyNavigator {
 		}
 		return
 	}
-  hideTriggerItems(group){
-    let className = this.options.triggerClass
-    if (group) {
-      className += `-${group}`
-    }
-    this.hideItems(className)
+  hideTriggerItems(view, group){
+    this.hideItems(this.options.triggerClass, group)
   }
-  hideViewItems(group){
-    let className = this.options.viewClass
-    if (group) {
-      className += `-${group}`
-    }
-    this.hideItems(className)
+  hideViewItems(view, group){
+    this.hideItems(view, group)
   }
-  hideItems(className){
-    let els = document.getElementsByClassName(className)
+  hideItems(view, group){
+		let els 
+		if (group && group !== 'main') {
+			els = [...document.querySelectorAll(`[${this.options.groupAttribute}="${group}"]`)]
+		}
+		else {
+			els = [...document.querySelectorAll(`[${this.options.viewAttribute}="${view}"]`)]
+		}		
     if (els) {
       for (var i = 0; i < els.length; i++) {
         els[i].classList.remove(this.options.activeClass)

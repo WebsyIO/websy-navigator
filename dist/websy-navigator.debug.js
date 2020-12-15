@@ -19,6 +19,7 @@ class WebsyNavigator {
 		this.currentView = ''
 		this.currentParams = {}
 		this.controlPressed = false
+		this.usesHTMLSuffix = window.location.pathname.indexOf('.htm') !== -1
     window.addEventListener('popstate', this.onPopState.bind(this))
 		window.addEventListener('keydown', this.handleKeyDown.bind(this))
     window.addEventListener('keyup', this.handleKeyUp.bind(this))
@@ -235,21 +236,24 @@ class WebsyNavigator {
 		}		
 		let toggle = false
 		let groupActiveView
-		let params = {}
-    let newPath = inputPath
-    if (inputPath === this.options.defaultView) {
+		let params = {}    
+		let newPath = inputPath
+    if (inputPath === this.options.defaultView && this.usesHTMLSuffix === false) {
       inputPath = inputPath.replace(this.options.defaultView, '/')
-    }	
+		}
+		if (this.usesHTMLSuffix === true) {
+			inputPath = `?view=${inputPath}`
+		}		
 		let previousParamsPath = this.currentParams.path
 		if (this.controlPressed === true && group===this.options.defaultGroup) {			
 			// Open the path in a new browser tab
 			window.open(`${window.location.origin}/${inputPath}`, '_blank')
 			return
 		}
-		if (newPath.indexOf('?') !== -1 && group===this.options.defaultGroup) {
-			let parts = newPath.split('?')
+		if (inputPath.indexOf('?') !== -1 && group===this.options.defaultGroup) {
+			let parts = inputPath.split('?')
 			params = this.formatParams(parts[1])
-			newPath = parts[0]
+			inputPath = parts[0]
 		}
 		else if (group===this.options.defaultGroup) {
 			this.currentParams = {}
@@ -306,6 +310,9 @@ class WebsyNavigator {
 		}
 		else {
 			this.showView(newPath)
+		}
+		if (this.usesHTMLSuffix === true) {
+			inputPath = window.location.pathname.split("/").pop() + inputPath
 		}
     if((this.currentPath !== newPath || previousParamsPath !== this.currentParams.path) && group===this.options.defaultGroup){			
       console.log('popped', popped)      
