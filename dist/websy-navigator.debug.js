@@ -17,6 +17,7 @@ class WebsyNavigator {
 		this.previousPath = ''
 		this.previousView = ''
 		this.currentView = ''
+		this.currentViewMain = ''
 		this.currentParams = {}
 		this.controlPressed = false
 		this.usesHTMLSuffix = window.location.pathname.indexOf('.htm') !== -1
@@ -45,6 +46,40 @@ class WebsyNavigator {
 				activeView: ''
 			}
 		}
+	}
+	addUrlParams (params) {
+		console.log('adding params', params);
+		if (typeof params === 'undefined') {
+			return
+		}
+		const output = {
+			path: '',
+			items: {}
+		}
+		let path = ''
+		if (this.currentParams && this.currentParams.items) {
+			output.items = Object.assign({}, this.currentParams.items, params)
+			path = this.buildUrlPath(output.items)
+		}
+		else if (Object.keys(params).length > 0) {
+			output.items = Object.assign({}, params)
+			path = this.buildUrlPath(output.items)
+		}
+		this.currentParams = output
+		let inputPath = this.currentView
+		if (this.options.urlPrefix) {
+			inputPath  = `/${this.options.urlPrefix}/${inputPath}`
+		}
+		history.pushState({
+			inputPath
+		}, inputPath, `${inputPath}?${path}`) 
+	}
+	buildUrlPath (params) {
+		let path = []
+		for (let key in params) {
+			path.push(`${key}=${params[key]}`)
+		}
+		return path.join('&')
 	}
 	formatParams(params) {
 		const output = {
@@ -85,6 +120,7 @@ class WebsyNavigator {
 	}
 	handleClick (event) {
 		// const id = event.target.id		
+		console.log(event.target)
 		if (event.target.classList.contains(this.options.triggerClass)) {
 			const view = event.target.getAttribute(this.options.viewAttribute)
 			const group = event.target.getAttribute(this.options.groupAttribute)
@@ -107,9 +143,15 @@ class WebsyNavigator {
 			url += `?${params.path}`
 		}
 		this.currentView = view
+		this.currentViewMain = view
 		if (this.currentView === '/' || this.currentView === '') {
 			this.currentView = this.options.defaultView
 		}
+		if (this.currentViewMain === '/' || this.currentViewMain === '') {
+			this.currentViewMain = this.options.defaultView
+		}
+		console.log('init', view)
+		console.trace()		
 		if (view !== "") {
       this.showView(view, params)
       // console.log('pushing state', url)      
@@ -230,19 +272,34 @@ class WebsyNavigator {
 		}
 		this.publish("show", [view, params])
 	}
+	reloadCurrentView () {
+		this.showView(this.currentView, this.currentParams)
+	}
   navigate(inputPath, group, event, popped){
+		console.log('inputPath', inputPath)
+		console.trace()		
 		if (typeof popped === 'undefined') {
 			popped = false
 		}		
 		let toggle = false
 		let groupActiveView
-		let params = {}    
-		let newPath = inputPath
+		let params = {}  		 
+		let newPath = inputPath		
     if (inputPath === this.options.defaultView && this.usesHTMLSuffix === false) {
       inputPath = inputPath.replace(this.options.defaultView, '/')
-		}
+		}		
+		if (this.options.persistentParameters === true) {
+			if (inputPath.indexOf('?') === -1) {
+				inputPath += `?${this.queryParams}`
+			}
+		} 
 		if (this.usesHTMLSuffix === true) {
-			inputPath = `?view=${inputPath}`
+			if (inputPath.indexOf('?') === -1) {
+				inputPath = `?view=${inputPath}`
+			}
+			else if (inputPath.indexOf('view=') === -1) {
+				inputPath = `&view=${inputPath}`
+			}			
 		}		
 		let previousParamsPath = this.currentParams.path
 		if (this.controlPressed === true && group===this.options.defaultGroup) {			
@@ -272,6 +329,9 @@ class WebsyNavigator {
 		}				
 		this.previousView = this.currentView		
 		this.previousPath = this.currentPath
+		if (!this.groups) {
+			this.groups = {}
+		}
 		if (this.groups[group]) {
 			if (toggle===false) {			
 				groupActiveView = this.groups[group].activeView
@@ -282,8 +342,10 @@ class WebsyNavigator {
 		//
 		// }
 		// else {
-		if (toggle === true && this.previousPath !== '') {
-			this.hideView(this.previousPath, group)
+		if (toggle === true) {
+			if (this.previousPath !== '') {
+				this.hideView(this.previousPath, group)
+			}
 		}
 		else {
 			this.hideView(this.previousView, group)
@@ -299,16 +361,22 @@ class WebsyNavigator {
 		if (group && this.groups[group] && group!==this.options.defaultGroup) {
 			this.groups[group].activeView = newPath
 		}
-		if (toggle === false) {
-			this.currentView = newPath	
+		if (toggle === false && group === 'main') {
+			this.currentView = inputPath
+		}
+		if (group === 'main') {
+			this.currentViewMain = inputPath
 		}		
 		if (this.currentView === '/') {
 			this.currentView = this.options.defaultView
 		}
+		if (this.currentViewMain === '/') {
+			this.currentViewMain = this.options.defaultView
+		}
 		if (toggle === false) {
 			this.showView(this.currentView, this.currentParams)
 		}
-		else {
+		else if (newPath && newPath !== '') {			
 			this.showView(newPath)
 		}
 		if (this.usesHTMLSuffix === true) {
@@ -317,10 +385,21 @@ class WebsyNavigator {
     if((this.currentPath !== newPath || previousParamsPath !== this.currentParams.path) && group===this.options.defaultGroup){			
       console.log('popped', popped)      
       if (popped === false) {
+				let historyUrl = inputPath
+				if (this.options.urlPrefix) {
+					historyUrl  = `/${this.options.urlPrefix}/${historyUrl}`
+					inputPath = `/${this.options.urlPrefix}/${inputPath}`
+				}
+				if (this.currentParams && this.currentParams.path) {
+					historyUrl+= `?${this.currentParams.path}`
+				}
+				else if (this.queryParams) {
+					historyUrl+= `?${this.queryParams}`
+				}
         console.log('pushing state', inputPath)
         history.pushState({
           inputPath
-        }, inputPath, inputPath) 
+        }, inputPath, historyUrl) 
       }
       else {
         console.log('NOT pushing state', inputPath)
@@ -349,6 +428,9 @@ class WebsyNavigator {
     if (path.indexOf(".htm")!==-1) {
       return ""
     }
+		if (this.options.urlPrefix && path === this.options.urlPrefix) {
+			return ""
+		}
     return path
   }
 	get queryParams() {

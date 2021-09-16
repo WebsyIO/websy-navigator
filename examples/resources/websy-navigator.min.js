@@ -42,6 +42,7 @@ function () {
     this.previousPath = '';
     this.previousView = '';
     this.currentView = '';
+    this.currentViewMain = '';
     this.currentParams = {};
     this.controlPressed = false;
     this.usesHTMLSuffix = window.location.pathname.indexOf('.htm') !== -1;
@@ -67,6 +68,51 @@ function () {
           activeView: ''
         };
       }
+    }
+  }, {
+    key: "addUrlParams",
+    value: function addUrlParams(params) {
+      console.log('adding params', params);
+
+      if (typeof params === 'undefined') {
+        return;
+      }
+
+      var output = {
+        path: '',
+        items: {}
+      };
+      var path = '';
+
+      if (this.currentParams && this.currentParams.items) {
+        output.items = _extends({}, this.currentParams.items, params);
+        path = this.buildUrlPath(output.items);
+      } else if (Object.keys(params).length > 0) {
+        output.items = _extends({}, params);
+        path = this.buildUrlPath(output.items);
+      }
+
+      this.currentParams = output;
+      var inputPath = this.currentView;
+
+      if (this.options.urlPrefix) {
+        inputPath = "/".concat(this.options.urlPrefix, "/").concat(inputPath);
+      }
+
+      history.pushState({
+        inputPath: inputPath
+      }, inputPath, "".concat(inputPath, "?").concat(path));
+    }
+  }, {
+    key: "buildUrlPath",
+    value: function buildUrlPath(params) {
+      var path = [];
+
+      for (var key in params) {
+        path.push("".concat(key, "=").concat(params[key]));
+      }
+
+      return path.join('&');
     }
   }, {
     key: "formatParams",
@@ -123,6 +169,8 @@ function () {
     key: "handleClick",
     value: function handleClick(event) {
       // const id = event.target.id		
+      console.log(event.target);
+
       if (event.target.classList.contains(this.options.triggerClass)) {
         var view = event.target.getAttribute(this.options.viewAttribute);
         var group = event.target.getAttribute(this.options.groupAttribute);
@@ -150,10 +198,18 @@ function () {
       }
 
       this.currentView = view;
+      this.currentViewMain = view;
 
       if (this.currentView === '/' || this.currentView === '') {
         this.currentView = this.options.defaultView;
       }
+
+      if (this.currentViewMain === '/' || this.currentViewMain === '') {
+        this.currentViewMain = this.options.defaultView;
+      }
+
+      console.log('init', view);
+      console.trace();
 
       if (view !== "") {
         this.showView(view, params); // console.log('pushing state', url)      
@@ -306,8 +362,16 @@ function () {
       this.publish("show", [view, params]);
     }
   }, {
+    key: "reloadCurrentView",
+    value: function reloadCurrentView() {
+      this.showView(this.currentView, this.currentParams);
+    }
+  }, {
     key: "navigate",
     value: function navigate(inputPath, group, event, popped) {
+      console.log('inputPath', inputPath);
+      console.trace();
+
       if (typeof popped === 'undefined') {
         popped = false;
       }
@@ -321,8 +385,18 @@ function () {
         inputPath = inputPath.replace(this.options.defaultView, '/');
       }
 
+      if (this.options.persistentParameters === true) {
+        if (inputPath.indexOf('?') === -1) {
+          inputPath += "?".concat(this.queryParams);
+        }
+      }
+
       if (this.usesHTMLSuffix === true) {
-        inputPath = "?view=".concat(inputPath);
+        if (inputPath.indexOf('?') === -1) {
+          inputPath = "?view=".concat(inputPath);
+        } else if (inputPath.indexOf('view=') === -1) {
+          inputPath = "&view=".concat(inputPath);
+        }
       }
 
       var previousParamsPath = this.currentParams.path;
@@ -357,6 +431,10 @@ function () {
       this.previousView = this.currentView;
       this.previousPath = this.currentPath;
 
+      if (!this.groups) {
+        this.groups = {};
+      }
+
       if (this.groups[group]) {
         if (toggle === false) {
           groupActiveView = this.groups[group].activeView;
@@ -369,8 +447,10 @@ function () {
       // else {
 
 
-      if (toggle === true && this.previousPath !== '') {
-        this.hideView(this.previousPath, group);
+      if (toggle === true) {
+        if (this.previousPath !== '') {
+          this.hideView(this.previousPath, group);
+        }
       } else {
         this.hideView(this.previousView, group);
       } // this.hideView(group)
@@ -388,17 +468,25 @@ function () {
         this.groups[group].activeView = newPath;
       }
 
-      if (toggle === false) {
-        this.currentView = newPath;
+      if (toggle === false && group === 'main') {
+        this.currentView = inputPath;
+      }
+
+      if (group === 'main') {
+        this.currentViewMain = inputPath;
       }
 
       if (this.currentView === '/') {
         this.currentView = this.options.defaultView;
       }
 
+      if (this.currentViewMain === '/') {
+        this.currentViewMain = this.options.defaultView;
+      }
+
       if (toggle === false) {
         this.showView(this.currentView, this.currentParams);
-      } else {
+      } else if (newPath && newPath !== '') {
         this.showView(newPath);
       }
 
@@ -410,10 +498,23 @@ function () {
         console.log('popped', popped);
 
         if (popped === false) {
+          var historyUrl = inputPath;
+
+          if (this.options.urlPrefix) {
+            historyUrl = "/".concat(this.options.urlPrefix, "/").concat(historyUrl);
+            inputPath = "/".concat(this.options.urlPrefix, "/").concat(inputPath);
+          }
+
+          if (this.currentParams && this.currentParams.path) {
+            historyUrl += "?".concat(this.currentParams.path);
+          } else if (this.queryParams) {
+            historyUrl += "?".concat(this.queryParams);
+          }
+
           console.log('pushing state', inputPath);
           history.pushState({
             inputPath: inputPath
-          }, inputPath, inputPath);
+          }, inputPath, historyUrl);
         } else {
           console.log('NOT pushing state', inputPath);
         }
@@ -487,6 +588,10 @@ function () {
       var path = window.location.pathname.split("/").pop();
 
       if (path.indexOf(".htm") !== -1) {
+        return "";
+      }
+
+      if (this.options.urlPrefix && path === this.options.urlPrefix) {
         return "";
       }
 
